@@ -13,7 +13,7 @@ require( 'dotenv' ).config();
 const app=express();
 app.use( express.json() );
 const corsOptions={
-    origin: 'http://localhost:3000',
+    origin: ['http://localhost:3000', 'https://6671c4a570b58f1f189eb318--tubular-pudding-e714d5.netlify.app'],
     credentials: true
 };
 
