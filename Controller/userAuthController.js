@@ -1,5 +1,5 @@
 const mongodb=require( '../Schema/userData' )
-const bcrypt=require( 'bcrypt' )
+const bcrypt=require( 'bcryptjs' )
 const saltRounds=10;
 
 const userRegister=async ( req, res ) => {
