@@ -31,25 +31,25 @@ app.use( '/home', ( req, res ) => {
 
 
 
-// Read existing contents of .env file
-let envContents='';
-try {
-    envContents=fs.readFileSync( '.env', 'utf8' );
-} catch ( err ) {
-    // File might not exist yet, which is okay
-}
-// Check if SESSION_SECRET_KEY already exists
-if ( !envContents.includes( 'SESSION_SECRET_KEY' ) ) {
-    // Generate a random secret
-    const secret=crypto.randomBytes( 64 ).toString( 'hex' );
-    // Append the new secret to the existing contents
-    envContents+=`\nSESSION_SECRET_KEY=${ secret }\n`;
-    // Write the updated contents back to the .env file
-    fs.writeFileSync( '.env', envContents );
-    console.log( 'Secret generated and appended to .env file.' );
-} else {
-    console.log( 'SESSION_SECRET_KEY already exists in .env file. Skipping generation.' );
-}
+// // Read existing contents of .env file
+// let envContents='';
+// try {
+//     envContents=fs.readFileSync( '.env', 'utf8' );
+// } catch ( err ) {
+//     // File might not exist yet, which is okay
+// }
+// // Check if SESSION_SECRET_KEY already exists
+// if ( !envContents.includes( 'SESSION_SECRET_KEY' ) ) {
+//     // Generate a random secret
+//     const secret=crypto.randomBytes( 64 ).toString( 'hex' );
+//     // Append the new secret to the existing contents
+//     envContents+=`\nSESSION_SECRET_KEY=${ secret }\n`;
+//     // Write the updated contents back to the .env file
+//     fs.writeFileSync( '.env', envContents );
+//     console.log( 'Secret generated and appended to .env file.' );
+// } else {
+//     console.log( 'SESSION_SECRET_KEY already exists in .env file. Skipping generation.' );
+// }
 
 
 app.use( session( {
