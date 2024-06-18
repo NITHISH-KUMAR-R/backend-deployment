@@ -5,9 +5,9 @@ const postapiRouter=express.Router();
 
 
 
-postapiRouter.post( '/post', middleware.verifySession, postController.userPost )
-postapiRouter.get( '/all', middleware.verifySession, postController.geloginUserPost )
-postapiRouter.get( '/allUserspost', middleware.verifySession, postController.allUserPost )
-postapiRouter.delete( '/delPost/:id', middleware.verifySession, postController.deleteUserPost )
+postapiRouter.post( '/post', middleware.verifyToken, postController.userPost )
+postapiRouter.get( '/all', middleware.verifyToken, postController.geloginUserPost )
+postapiRouter.get( '/allUserspost', middleware.verifyToken, postController.allUserPost )
+postapiRouter.delete( '/delPost/:id', middleware.verifyToken, postController.deleteUserPost )
 
 module.exports=postapiRouter

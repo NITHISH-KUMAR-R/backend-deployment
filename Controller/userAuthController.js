@@ -1,101 +1,121 @@
-const mongodb=require( '../Schema/userData' );
-const bcrypt=require( 'bcryptjs' );
-const jwt=require( 'jsonwebtoken' );
-const { jwtSecret }=require( '../config' ); // Create a config file to store JWT secret
+const mongodb=require( '../Schema/userData' )
+const bcrypt=require( 'bcrypt' )
+const jwt=require( 'jsonwebtoken' )
+const tokenData=require( '../Schema/tokenSchema' );
+const tokenSchema=require( '../Schema/tokenSchema' );
+const saltRounds=10;
 
 const userRegister=async ( req, res ) => {
     const { name, email, password }=req.body;
-    const salt=bcrypt.genSaltSync( 10 );
-    const hashedPassword=bcrypt.hashSync( password, salt );
-
+    const salt=bcrypt.genSaltSync( saltRounds );
+    // const hash=bcrypt.hashSync( password, salt );
     const regDetails=new mongodb( {
-        username: name,
-        email: email,
-        password: hashedPassword
-    } );
-
+        username: name, email, password: bcrypt.hashSync( password, salt )
+    } )
     try {
         await regDetails.save();
-        res.send( 'Successfully Added to DB' );
+
+        res.send( 'Successfully Added to DB' )
     } catch ( err ) {
-        console.log( err );
-        res.status( 500 ).send( 'Internal Server error' );
+        console.log( err )
+        res.status( 500 ).send( 'Internal Server error' )
     }
 }
 
 const userLogin=async ( req, res ) => {
     const { email, password }=req.body;
-
+    //const hashpassword=bcrypt.compareSync( myPlaintextPassword, hash ); // true
     try {
-        const userDb=await mongodb.findOne( { email: email } ).exec();
-
+        const userDb=await mongodb.findOne( { email: email } ).exec(); // Assuming 'email' is the email address you're searching for
+        //console.log( userDb.password )
         if ( !userDb ) {
-            console.log( 'User not found' );
-            return res.status( 404 ).send( 'User not found in DB' );
+            console.log( 'user Not found' )
+            return res.status( 404 ).send( 'user Not found in DB' )
         }
-
-        const isValidPassword=bcrypt.compareSync( password, userDb.password );
-
+        // console.log( userDb )
+        const isValidPassword=bcrypt.compareSync( password, userDb.password ); // true
         if ( !isValidPassword ) {
-            console.log( 'Password incorrect' );
-            return res.status( 401 ).send( 'Invalid Password' );
+            console.log( 'Password incorrect' )
+            return res.status( 401 ).send( "Invalid Password" )
         }
+        req.session.userSession={ Userid: userDb._id, name: userDb.email } //used to store session ID in userSession in req.session
+        const token=jwt.sign( { email }, "thisisjwtSecret", { expiresIn: '1hr' } )
 
-        // Create JWT token
-        const token=jwt.sign( { userId: userDb._id, email: userDb.email }, jwtSecret, { expiresIn: '1h' } );
+        const expiration=new Date( Date.now()+3600*1000 );
+        const tokenDocument=new tokenData( {
+            token,
+            expiresAt: expiration,
+            userId: userDb._id
+        } )
+        await tokenDocument.save();
+        console.log( token )
+        console.log( tokenData )
 
-        return res.json( { message: "User Logged In Successfully", token } );
+        //console.log( req.session )
+        // console.log("User Logg")
+        //    const userNameDB = await mongodb.findOne( { email: email } ).exec();
+        // console.log( userDb.email )
+        // return res.send( { message: "User Logged In Successfully", username: userDb.email } );
+        return res.send( { message: "User Logged In Successfully", username: userDb.email, token: token } );
+
     } catch ( err ) {
         console.log( err );
-        return res.status( 500 ).send( 'Internal server error in password' );
+        return res.status( 500 ).send( 'Internal server error in password' )
     }
 }
 
 const allUserProfile=async ( req, res ) => {
     try {
         const allUsersDb=await mongodb.find().exec();
-        console.log( 'Length of all users', allUsersDb.length );
-        res.send( allUsersDb );
-    } catch ( err ) {
-        res.status( 500 ).send( 'Internal Server error while fetching all users' );
+        console.log( "Length of all users", allUsersDb.length )
+        res.send( allUsersDb )
+
+    } catch {
+        res.status( 500 ).send( "Internal Server error while fetching all users" )
     }
 }
 
-// Middleware to verify JWT token
-const verifyToken=( req, res, next ) => {
-    const token=req.headers.authorization?.split( ' ' )[1];
+//const tokenData=require( '../Schema/tokenData' ); // Ensure this path is correct
+const logout=async ( req, res ) => {
+    const token=req.header( 'Authorization' );
 
     if ( !token ) {
-        return res.status( 401 ).json( { message: 'Unauthorized: No token provided' } );
+        return res.status( 400 ).json( { message: "No token provided" } );
     }
 
-    jwt.verify( token, jwtSecret, ( err, decoded ) => {
-        if ( err ) {
-            console.error( 'Failed to authenticate token:', err );
-            return res.status( 403 ).json( { message: 'Unauthorized: Failed to authenticate token' } );
+    // Remove 'Bearer ' prefix if present
+    const tokenWithoutBearer=token.startsWith( 'Bearer ' )? token.slice( 7, token.length ):token;
+
+    try {
+        const result=await tokenData.findOneAndDelete( { token: tokenWithoutBearer } );
+
+        if ( !result ) {
+            return res.status( 404 ).json( { message: "Token not found" } );
         }
 
-        req.user=decoded; // Attach decoded user information to request object
-        next();
-    } );
-}
+        return res.status( 200 ).json( { message: "Logged out successfully" } );
+    } catch ( error ) {
+        console.log( "Error logging out", error );
+        return res.status( 500 ).send( "Error logging out" );
+    }
+};
 
-const logout=async ( req, res ) => {
-    // In JWT, logout is client-side. Just discard the token on the client.
-    res.send( "User Logout successful" );
-}
 
 const sessionData=async ( req, res ) => {
+
     try {
-        // User information is already attached to req.user via verifyToken middleware
-        if ( req.user ) {
-            res.json( req.user );
+        if ( req.user.userId ) {
+            console.log( req.user.userId )
+            res.send( req.user.userId );
         } else {
-            res.status( 401 ).json( { error: 'Not authenticated' } );
+            res.status( 401 ).send( { error: 'Not authenticated' } );
         }
-    } catch ( error ) {
-        res.status( 500 ).send( "Error while fetching session data from userSession" );
+
     }
+    catch ( error ) {
+        res.status( 500 ).send( "Error while fecthing session data from userSession" )
+    }
+
 }
 
-module.exports={ userRegister, userLogin, allUserProfile, verifyToken, logout, sessionData };
+module.exports={ userRegister, userLogin, allUserProfile, logout, sessionData }

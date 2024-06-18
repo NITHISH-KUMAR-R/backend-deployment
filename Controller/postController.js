@@ -3,7 +3,9 @@ const userModel=require( '../Schema/userData' );
 const { like }=require( './postLikesDislikes' );
 
 const userPost=async ( req, res ) => {
-    const user_Id=req.session.userSession.Userid;
+    const user_Id=req.user.userId;
+    console.log( user_Id )
+
 
     const { postMessage }=req.body;
     console.log( postMessage )
@@ -37,12 +39,13 @@ const userPost=async ( req, res ) => {
 
 
 const geloginUserPost=async ( req, res ) => {
-    const user_ID=req.session.userSession.Userid;
+    const user_ID=req.user.userId;
     try {
         const postDatabse=await postModel.findOne( { uid: user_ID } ).exec();
+        console.log( postDatabse )
         const usersAllPost=postDatabse.messagesList.map( p => p.userPost )
         console.log( usersAllPost )
-        res.json( usersAllPost )
+        res.json( postDatabse )
 
 
 

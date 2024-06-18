@@ -2,7 +2,7 @@ const usersPodtModel=require( '../Schema/postSchema' )
 
 const like=async ( req, res ) => {
     const postId=req.params.pid;
-    const userid=req.session.userSession.Userid;
+    const userid=req.user.userId;
     try {
         const postWithMatchingId=await usersPodtModel.findOne( { "messagesList._id": postId } );
         //console.log( postWithMatchingId )
@@ -34,7 +34,7 @@ const like=async ( req, res ) => {
 
 const dislike=async ( req, res ) => {
     const postId=req.params.pid;
-    const userId=req.session.userSession.Userid;
+    const userId=req.user.userId;
     try {
         const postWithMatchingId=await usersPodtModel.findOne( { "messagesList._id": postId } );
         if ( postWithMatchingId ) {

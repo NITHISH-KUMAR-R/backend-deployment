@@ -1,3 +1,4 @@
+const tokenData=require( '../Schema/tokenSchema' );
 const mongoDb=require( '../Schema/userData' );
 
 const verifySession=async ( req, res, next ) => {
@@ -25,5 +26,38 @@ const verifySession=async ( req, res, next ) => {
         res.status( 500 ).send( "Internal session server error" );
     }
 }
+const verifyToken=async ( req, res, next ) => {
+    const authHeader=req.header( 'Authorization' );
+    console.log( 'Authorization header:', authHeader );
 
-module.exports={ verifySession };
+    if ( !authHeader||!authHeader.startsWith( 'Bearer ' ) ) {
+        return res.status( 400 ).json( { message: "Invalid authorization header format" } );
+    }
+
+    const token=authHeader.substring( 7 ).trim(); // Remove 'Bearer ' prefix and trim whitespace
+    console.log( 'Extracted token:', token );
+
+    try {
+        const tokenDocument=await tokenData.findOne( { token: token } );
+        console.log( 'Token Document from DB:', tokenDocument );
+
+        if ( !tokenDocument ) {
+            return res.status( 401 ).json( { message: "Invalid token" } );
+        }
+
+        if ( new Date()>tokenDocument.expiresAt ) {
+            return res.status( 401 ).json( { message: "Token expired" } );
+        }
+
+        // Token is valid, proceed to the next middleware
+        req.user={ userId: tokenDocument.userId }; // Attach userId to the request object if needed
+        next();
+    } catch ( error ) {
+        console.log( "Error finding token in database:", error );
+        return res.status( 500 ).send( "Error verifying token" );
+    }
+
+
+};
+
+module.exports={ verifySession, verifyToken };

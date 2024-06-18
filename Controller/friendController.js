@@ -4,14 +4,17 @@ const friendReqModel=require( '../Schema/friendRequestSchema' )
 
 
 const displayAllFriends = async (req, res) => {
-    const user_id = req.session.userSession.Userid;
+    const user_id = req.user.userId
+    console.log("friends",user_id)
     try {
         const friendListt = await friendModel.findOne({ userid: user_id }).exec();
+        console.log("hello",friendListt)
         if (friendListt && friendListt.friendList) {
             const friendNames = friendListt.friendList.map(f => f.fName);
             console.log(friendNames);
             res.send(friendListt.friendList);
         } else {
+            console.log('error')
             // Handle the case when the friend list is null or empty
             res.send([]);
         }
@@ -27,7 +30,7 @@ const displayAllFriends = async (req, res) => {
 
 const sendFriendRequest=async ( req, res ) => {
     //const user_id=req.session.userSession.Userid;
-    const senderId=req.session.userSession.Userid;
+    const senderId=req.user.userId
     const receiverId=req.params.recieverId;
     console.log( "reciever", receiverId )
     try {
@@ -103,7 +106,7 @@ const addingAcceptedFriendlist = async (accepterId, requestedId) => {
 
 
 const acceptFriend = async (req, res) => {
-    const accepterReceiverId = req.session.userSession.Userid;
+    const accepterReceiverId = req.user.userId;
     const requestId = req.params.reqId;
 
     try {
@@ -137,7 +140,8 @@ const acceptFriend = async (req, res) => {
 
 
 const receivedRequestForLoggedInUser = async (req, res) => {
-    const userId = req.session.userSession.Userid;
+    const userId = req.user.userId; // Extract logged-in user's ID from request
+    //console.log("friend",userId)
 
     try {
         // Find all pending friend requests where the logged-in user is the receiver
@@ -146,7 +150,7 @@ const receivedRequestForLoggedInUser = async (req, res) => {
 
         // Format the response to include senderName and senderEmail
         const formattedRequests = receivedRequests.map(request => ({
-            _id: request._id,
+            _id: request._id, // Assuming request._id is the unique identifier
             senderName: request.sender.username,
             senderEmail: request.sender.email,
         }));
@@ -161,7 +165,7 @@ const receivedRequestForLoggedInUser = async (req, res) => {
 
 
 const showUnknownUsers = async (req, res) => {
-    const userId = req.session.userSession.Userid;
+    const userId = req.user.userId
 
     try {
         // Fetch all users from the database

@@ -1,32 +1,25 @@
 const express=require( 'express' )
 const mongoose=require( 'mongoose' )
-
 const session=require( 'express-session' );
 const MongoStore=require( 'connect-mongo' );
 const fs=require( 'fs' );
 const crypto=require( 'crypto' );
+const indexRoute=require( './Router/indexRoute' )
 const cors=require( 'cors' );
-const router=require( './Router/indexRoute' )
 
 
 require( 'dotenv' ).config();
 
 const app=express();
 app.use( express.json() );
-
 const corsOptions={
-    origin: ['https://x-serv-thought-sharing.netlify.app', 'http://localhost:3000', 'https://6670a71e076d5c4913d94b08--enchanting-bublanina-674aac.netlify.app',
-        'https://6671194fa1ffecad68cd53e5--frabjous-dodol-b52719.netlify.app', 'https://66711e89e1a075ba75cdc9de--cool-puffpuff-5cf871.netlify.app'
-    ],
+    origin: 'http://localhost:3000',
     credentials: true
 };
 
 app.use( cors( corsOptions ) );
-app.use( '/api', router )
 
-app.use( '/home', ( req, res ) => {
-    res.send( 'This is is my homepage' )
-} )
+
 // Additional CORS configurations as needed
 
 
@@ -63,7 +56,7 @@ app.use( session( {
     cookie: {
         // maxAge: 5*60*1000, // 5 minutes in milliseconds
         httpOnly: true, // Recommended to prevent client-side JS from accessing the cookie
-        secure: true, // Recommended to ensure cookies are sent over HTTPS
+        secure: process.env.NODE_ENV==='production', // Recommended to ensure cookies are sent over HTTPS
         //     sameSite: 'strict' // Recommended to mitigate CSRF attacks
     }
 } ) );
@@ -85,8 +78,7 @@ mongoDb.once( 'open', () => {
     console.log( 'Connection successfullly opened to MongoDb NoSQL' )
 } )
 // mongoDb.createCollection( 'UserDetails' )
-
-
+app.use( '/api', indexRoute )
 // app.use( '/reg', router )
 // app.use( '/user', router )
 // app.use( '/friend', friendRouter )
@@ -97,6 +89,3 @@ const PORT=process.env.PORT;
 app.listen( PORT, () => {
     console.log( `Server is listening on the port${ PORT }` )
 } )
-
-
-module.exports=app

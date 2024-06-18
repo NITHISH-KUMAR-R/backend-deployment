@@ -8,10 +8,10 @@ const apiRoute=express.Router();
 
 apiRoute.post( '/newUserReg', userController.userRegister )
 apiRoute.post( '/login', userController.userLogin )
-apiRoute.get( "/all", middleware.verifySession, userController.allUserProfile )
+apiRoute.get( "/all", middleware.verifyToken, userController.allUserProfile )
 
 apiRoute.post( '/logout', userController.logout )
 
-apiRoute.get( '/', middleware.verifySession, userReqController.userProfile )
-apiRoute.get( '/session', middleware.verifySession, userController.sessionData )
+apiRoute.get( '/', middleware.verifyToken, userReqController.userProfile )
+apiRoute.get( '/session', middleware.verifyToken, userController.sessionData )
 module.exports=apiRoute

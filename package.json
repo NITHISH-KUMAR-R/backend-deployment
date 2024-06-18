@@ -21,8 +21,7 @@
     "test": "mocha",
     "start": "node app.js",
     "dev": "nodemon app.js",
-    "vercel-build": "echo hello",
-    "postinstall": "npm rebuild"
+    "vercel-build": "echo hello"
   },
   "keywords": [
     "Mini",
