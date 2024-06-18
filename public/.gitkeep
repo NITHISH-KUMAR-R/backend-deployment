@@ -1,0 +1,6 @@
+PORT=5000
+
+MONGO_URI =mongodb+srv://nithishlearn45:LAuM7d5flTJSt5iF@cluster0.xz6mtmu.mongodb.net/project-node-server?retryWrites=true&w=majority&appName=Cluster0
+
+
+SESSION_SECRET_KEY=108773af1f42a1af9b7119381222181aa50d1f37009adfbbfdfff5228fde02d17ab45c3ca9afe5cdc02308dee31c91082c11b755f962f347d3ee638b0c2f9c05
