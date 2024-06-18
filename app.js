@@ -16,7 +16,7 @@ app.use( express.json() );
 
 const corsOptions={
     origin: ['https://x-serv-thought-sharing.netlify.app', 'http://localhost:3000', 'https://6670a71e076d5c4913d94b08--enchanting-bublanina-674aac.netlify.app',
-        'https://6671194fa1ffecad68cd53e5--frabjous-dodol-b52719.netlify.app'
+        'https://6671194fa1ffecad68cd53e5--frabjous-dodol-b52719.netlify.app', 'https://66711e89e1a075ba75cdc9de--cool-puffpuff-5cf871.netlify.app'
     ],
     credentials: true
 };
