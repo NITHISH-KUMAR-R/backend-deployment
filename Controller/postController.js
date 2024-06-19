@@ -1,3 +1,4 @@
+const friendSchema=require( '../Schema/friendSchema' );
 const postModel=require( '../Schema/postSchema' )
 const userModel=require( '../Schema/userData' );
 const { like }=require( './postLikesDislikes' );
@@ -107,4 +108,35 @@ const deleteUserPost=async ( req, res ) => {
     }
 };
 
-module.exports={ userPost, geloginUserPost, allUserPost, deleteUserPost }
+const showonlyFriendsPost=async ( req, res ) => {
+    const userId=req.user.userId; // Assuming this is the logged-in user's ID
+    console.log( userId )
+    try {
+        // Find the document in friendSchema where userid matches the logged-in user's ID
+        const friendData=await friendSchema.findOne( { userid: userId } );
+
+        if ( !friendData ) {
+            return res.status( 404 ).json( { message: "Friend data not found" } );
+        }
+
+        // Extract friend names from the friendList array
+        const friendNames=friendData.friendList.map( friend => friend.fName );
+
+        // Now you have an array of friend names (`friendNames`), you can use this data as needed
+
+        // Example: Fetch posts from postModel where user_id is in the friend list
+        const friendPosts=await postModel.find( { username: { $in: friendNames } } );
+
+        // Return response with friend posts or perform other operations
+        return res.status( 200 ).json( { friendPosts } );
+
+    } catch ( error ) {
+        console.error( 'Error fetching friends data:', error );
+        return res.status( 500 ).json( { message: "Server error" } );
+    }
+};
+
+
+
+
+module.exports={ userPost, geloginUserPost, allUserPost, deleteUserPost, showonlyFriendsPost }
