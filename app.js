@@ -13,7 +13,7 @@ require( 'dotenv' ).config();
 const app=express();
 app.use( express.json() );
 const corsOptions={
-    origin: ['http://localhost:3000', 'https://daily-thought-sharing-webapp.netlify.app', 'https://daily-thoughts-sharing-webapp.netlify.app', 'https://dialy-thoughts-sharing-webapp.vercel.app'],
+    origin: ['http://localhost:3000', 'https://daily-thought-sharing-webapp.netlify.app', 'https://daily-thoughts-sharing-webapp.netlify.app', 'https://daily-thoughts-sharing-webapp.vercel.app'],
     credentials: true
 };
 
