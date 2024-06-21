@@ -66,7 +66,12 @@ const userLogin=async ( req, res ) => {
 
 const allUserProfile=async ( req, res ) => {
     try {
-        const allUsersDb=await mongodb.find().exec();
+        const loggedinUser=req.user.userId;
+        console.log( loggedinUser )
+        // const ObjectId=require( 'mongoose' ).Types.ObjectId;
+        // const loggedinUserId=new ObjectId( loggedinUser );
+
+        const allUsersDb=await mongodb.find( { _id: { $ne: loggedinUser } } ).exec();
         console.log( "Length of all users", allUsersDb.length )
         res.send( allUsersDb )
 

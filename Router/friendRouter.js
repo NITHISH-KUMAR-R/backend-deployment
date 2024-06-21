@@ -13,5 +13,6 @@ friendRoute.post( '/req/:recieverId', middleware.verifyToken, friendController.s
 friendRoute.post( '/pending/:reqId', middleware.verifyToken, friendController.acceptFriend )
 friendRoute.get( '/recievedReq', middleware.verifyToken, friendController.receivedRequestForLoggedInUser )
 friendRoute.get( '/unkownuser', middleware.verifyToken, friendController.showUnknownUsers )
+friendRoute.get( '/pendingReq', middleware.verifyToken, friendController.getPendingRequests )
 
 module.exports=friendRoute

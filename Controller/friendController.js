@@ -25,6 +25,38 @@ const displayAllFriends = async (req, res) => {
 }
 
 
+// const sendFriendRequest = async (req, res) => {
+//     const senderId = req.user.userId;
+//     const receiverId = req.params.receiverId;
+//     console.log("receiver", receiverId);
+
+//     try {
+//         // Check if a pending friend request already exists
+//         const existingRequest = await friendReqModel.findOne({
+//             sender: senderId,
+//             receiver: receiverId,
+//             status: 'pending'
+//         });
+
+//         if (existingRequest) {
+//             // If a pending request exists, return a response indicating so
+//             return res.status(400).send('Friend request already pending');
+//         }
+
+//         // If no pending request exists, create a new friend request
+//         const friendReqDb = new friendReqModel({
+//             sender: senderId,
+//             receiver: receiverId,
+//             status: 'pending'
+//         });
+
+//         await friendReqDb.save();
+//         res.send('Friend request sent successfully');
+//     } catch (err) {
+//         console.error(err);
+//         res.status(500).send("Error sending friend request");
+//     }
+// };
 
 
 
@@ -33,15 +65,28 @@ const sendFriendRequest=async ( req, res ) => {
     const senderId=req.user.userId
     const receiverId=req.params.recieverId;
     console.log( "reciever", receiverId )
-    try {
-        const friendReqDb=new friendReqModel( {
+        try {
+        // Check if a pending friend request already exists
+        const existingRequest = await friendReqModel.findOne({
             sender: senderId,
             receiver: receiverId,
             status: 'pending'
+        });
 
-        } )
-        await friendReqDb.save()
-        res.send( 'Friend request Send Successfully' )
+        if (existingRequest) {
+            // If a pending request exists, return a response indicating so
+            return res.status(200).send('Friend request already pending');
+        }
+
+        // If no pending request exists, create a new friend request
+        const friendReqDb = new friendReqModel({
+            sender: senderId,
+            receiver: receiverId,
+            status: 'pending'
+        });
+
+        await friendReqDb.save();
+        res.send('Friend request sent successfully');
     } catch ( err ) {
         console.error( err )
         res.status( 500 ).send( "Error Sending friend Request" )
@@ -169,7 +214,7 @@ const showUnknownUsers = async (req, res) => {
 
     try {
         // Fetch all users from the database
-        const allUsers = await userModel.find().lean().exec();
+        const allUsers = await userModel.find({ _id: { $ne: userId } }).lean().exec();
 
         // Fetch friend list of the logged-in user
         const friendList = await friendModel.findOne({ userid: userId }).lean().exec();
@@ -193,9 +238,23 @@ const showUnknownUsers = async (req, res) => {
         res.status(500).send('Internal Server Error');
     }
 };
+const getPendingRequests = async (req, res) => {
+    const userId = req.user.userId; // Extract logged-in user's ID from request
+
+    try {
+        // Find all pending friend requests where the logged-in user is either sender or receiver
+        const sentRequests = await friendReqModel.find({ sender: userId, status: 'pending' }).populate('receiver', 'username email');
+        const receivedRequests = await friendReqModel.find({ receiver: userId, status: 'pending' }).populate('sender', 'username email');
+
+        res.json({ sentRequests, receivedRequests });
+    } catch (error) {
+        console.error('Error fetching pending requests:', error);
+        res.status(500).send('Error fetching pending requests');
+    }
+};
 
 
-module.exports={ displayAllFriends, sendFriendRequest, acceptFriend,receivedRequestForLoggedInUser ,showUnknownUsers}
+module.exports={ displayAllFriends, sendFriendRequest, acceptFriend,receivedRequestForLoggedInUser ,showUnknownUsers,getPendingRequests}
 
 
 
