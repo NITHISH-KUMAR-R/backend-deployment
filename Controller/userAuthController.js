@@ -25,7 +25,21 @@ const saltRounds=10;
 const userRegister=async ( req, res ) => {
     const { name, email, password }=req.body;
 
+    if ( !name||!email||!password ) {
+        return res.status( 400 ).send( 'All fields are required' );
+    }
+
     try {
+        const existingEmail=await mongodb.findOne( { email } );
+        if ( existingEmail ) {
+            return res.status( 409 ).json( { message: 'Email already in use' } );
+        }
+
+        const existingUsername=await mongodb.findOne( { username: name } );
+        if ( existingUsername ) {
+            return res.status( 409 ).json( { message: 'Username already in use' } );
+        }
+
         const salt=bcrypt.genSaltSync( saltRounds );
         const hashedPassword=bcrypt.hashSync( password, salt );
 
@@ -39,9 +53,11 @@ const userRegister=async ( req, res ) => {
         res.send( 'Successfully Added to DB' );
     } catch ( err ) {
         console.error( 'Error registering user:', err );
-        res.status( 500 ).send( 'Internal Server error' );
+        res.status( 500 ).send( 'Internal Server Error' );
     }
 };
+
+
 
 const userLogin=async ( req, res ) => {
     const { email, password }=req.body;
