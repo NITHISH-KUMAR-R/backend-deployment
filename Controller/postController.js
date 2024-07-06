@@ -20,7 +20,7 @@ const userPost=async ( req, res ) => {
             postDatabse=new postModel( {
                 uid: user_Id,
                 username: userData.username,
-                messagesList: [{ userPost: postMessage, like: 1, disLikes: 1 }],
+                messagesList: [{ userPost: postMessage, like: 0, disLikes: 0 }],
 
             } )
         } else {

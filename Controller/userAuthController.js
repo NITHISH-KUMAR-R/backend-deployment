@@ -5,22 +5,43 @@ const tokenData=require( '../Schema/tokenSchema' );
 const tokenSchema=require( '../Schema/tokenSchema' );
 const saltRounds=10;
 
+// const userRegister=async ( req, res ) => {
+//     const { name, email, password }=req.body;
+//     const salt=bcrypt.genSaltSync( saltRounds );
+//     // const hash=bcrypt.hashSync( password, salt );
+//     const regDetails=new mongodb( {
+//         username: name, email, password: bcrypt.hashSync( password, salt )
+//     } )
+//     try {
+//         await regDetails.save();
+
+//         res.send( 'Successfully Added to DB' )
+//     } catch ( err ) {
+//         console.log( err )
+//         res.status( 500 ).send( 'Internal Server error' )
+//     }
+// }
+
 const userRegister=async ( req, res ) => {
     const { name, email, password }=req.body;
-    const salt=bcrypt.genSaltSync( saltRounds );
-    // const hash=bcrypt.hashSync( password, salt );
-    const regDetails=new mongodb( {
-        username: name, email, password: bcrypt.hashSync( password, salt )
-    } )
-    try {
-        await regDetails.save();
 
-        res.send( 'Successfully Added to DB' )
+    try {
+        const salt=bcrypt.genSaltSync( saltRounds );
+        const hashedPassword=bcrypt.hashSync( password, salt );
+
+        const regDetails=new mongodb( {
+            username: name,
+            email,
+            password: hashedPassword
+        } );
+
+        await regDetails.save();
+        res.send( 'Successfully Added to DB' );
     } catch ( err ) {
-        console.log( err )
-        res.status( 500 ).send( 'Internal Server error' )
+        console.error( 'Error registering user:', err );
+        res.status( 500 ).send( 'Internal Server error' );
     }
-}
+};
 
 const userLogin=async ( req, res ) => {
     const { email, password }=req.body;

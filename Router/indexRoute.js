@@ -12,4 +12,5 @@ router.use( '/friend', friendRouter )
 router.use( '/msg', postRouter )
 router.use( '/heart', likeRouter )
 
+
 module.exports=router

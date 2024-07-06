@@ -17,6 +17,7 @@ const corsOptions={
     credentials: true
 };
 
+
 app.use( cors( corsOptions ) );
 
 
@@ -79,6 +80,7 @@ mongoDb.once( 'open', () => {
 } )
 // mongoDb.createCollection( 'UserDetails' )
 app.use( '/api', indexRoute )
+
 // app.use( '/reg', router )
 // app.use( '/user', router )
 // app.use( '/friend', friendRouter )
